@@ -8,11 +8,47 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <style>
-body { font-family: Arial; background:#f4f6f8; padding:20px; max-width:900px; margin:auto; }
-.card { background:white; padding:15px; margin-bottom:15px; border-radius:10px; }
-input, select { width:100%; padding:8px; margin-top:5px; }
-button { padding:10px; margin-top:10px; cursor:pointer; background:#1f6feb; color:white; border:0; border-radius:6px; }
-a.button { display:inline-block; padding:10px; background:#555; color:white; border-radius:6px; text-decoration:none; margin-top:10px; }
+body {
+    font-family: Arial;
+    background:#f4f6f8;
+    max-width:1000px;
+    margin:auto;
+    padding:20px;
+}
+
+.card {
+    background:white;
+    padding:15px;
+    margin-bottom:15px;
+    border-radius:10px;
+}
+
+input, select, textarea {
+    width:100%;
+    padding:8px;
+    margin-top:5px;
+}
+
+table {
+    width:100%;
+    border-collapse: collapse;
+}
+
+td, th {
+    border-bottom:1px solid #ddd;
+    padding:8px;
+    text-align:left;
+}
+
+button {
+    padding:10px;
+    margin-top:10px;
+    background:#1f6feb;
+    color:white;
+    border:0;
+    border-radius:6px;
+    cursor:pointer;
+}
 </style>
 </head>
 
@@ -29,30 +65,119 @@ a.button { display:inline-block; padding:10px; background:#555; color:white; bor
 <label>Baujahr</label>
 <input id="baujahr" type="number">
 
-<label>Fläche</label>
+<label>Fläche (m²)</label>
 <input id="flaeche" type="number">
+</div>
 
-<a class="button" href="bad.html">➡ Bad Bewertung öffnen</a>
+<div class="card">
+<h3>🏗️ Bauteile Bewertung (1 gut – 5 schlecht)</h3>
+
+<table>
+<tr><th>Bereich</th><th>Zustand</th></tr>
+
+<tr><td>Dach</td><td><select class="z"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></td></tr>
+<tr><td>Fassade</td><td><select class="z"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></td></tr>
+<tr><td>Heizung</td><td><select class="z"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></td></tr>
+<tr><td>Fenster</td><td><select class="z"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></td></tr>
+
+</table>
+</div>
+
+<div class="card">
+<h3>🛁 Bad Bewertung</h3>
+
+<select id="bad">
+    <option value="1">1 sehr gut</option>
+    <option value="2">2 gut</option>
+    <option value="3">3 mittel</option>
+    <option value="4">4 schlecht</option>
+    <option value="5">5 sehr schlecht</option>
+</select>
+
+<label>Bad Kommentar</label>
+<textarea id="badText"></textarea>
+</div>
+
+<div class="card">
+<h3>📝 Protokoll / Beschreibung</h3>
+
+<textarea id="protokoll" placeholder="Gesamteindruck, Schäden, Empfehlungen..."></textarea>
 </div>
 
 <div class="card" id="report">
-<h3>Zusammenfassung</h3>
-<p>Fülle die Bewertung auf den Unterseiten aus.</p>
+<h3>📊 Ergebnis</h3>
+
+<p id="score">–</p>
+<p id="text"></p>
+<p id="kosten"></p>
 </div>
 
+<button onclick="calc()">Berechnen</button>
 <button onclick="exportPDF()">PDF Export</button>
 
 <script>
-function exportPDF() {
-    const element = document.getElementById("report");
+function calc() {
+    let values = document.querySelectorAll(".z");
+    let sum = 0;
 
-    html2pdf().set({
-        margin: 10,
-        filename: 'immobilienbewertung.pdf',
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2 },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    }).from(element).save();
+    values.forEach(v => sum += Number(v.value));
+
+    let avg = sum / values.length;
+
+    let score = Math.round(100 - ((avg - 1) / 4) * 100);
+
+    document.getElementById("score").innerText = "Score: " + score + " / 100";
+
+    let text = "";
+    if (score > 75) text = "Guter Zustand";
+    else if (score > 50) text = "Mittlerer Zustand";
+    else text = "Sanierungsbedarf";
+
+    document.getElementById("text").innerText = text;
+
+    let flaeche = Number(document.getElementById("flaeche").value || 0);
+    let cost = (5 - avg) * 300 * flaeche;
+
+    document.getElementById("kosten").innerText =
+        "Kosten: " + Math.round(cost) + " €";
+}
+
+function exportPDF() {
+
+    const score = document.getElementById("score").innerText;
+    const text = document.getElementById("text").innerText;
+    const kosten = document.getElementById("kosten").innerText;
+
+    const protokoll = document.getElementById("protokoll").value;
+    const bad = document.getElementById("bad").value;
+    const badText = document.getElementById("badText").value;
+
+    const html = `
+    <h1>Immobilienbewertung Protokoll</h1>
+
+    <h2>Objekt</h2>
+    <p>Adresse: ${adresse.value}</p>
+    <p>Baujahr: ${baujahr.value}</p>
+    <p>Fläche: ${flaeche.value} m²</p>
+
+    <h2>Ergebnis</h2>
+    <p>${score}</p>
+    <p>${text}</p>
+    <p>${kosten}</p>
+
+    <h2>Bad Bewertung</h2>
+    <p>Score: ${bad}</p>
+    <p>${badText}</p>
+
+    <h2>Protokoll</h2>
+    <p>${protokoll.replaceAll("\n","<br>")}</p>
+    `;
+
+    const container = document.createElement("div");
+    container.innerHTML = html;
+    document.body.appendChild(container);
+
+    html2pdf().from(container).save("immobilienbewertung.pdf");
 }
 </script>
 
