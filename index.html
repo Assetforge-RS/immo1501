@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Immobilienbewertung</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+<style>
+body { font-family: Arial; background:#f4f6f8; padding:20px; max-width:900px; margin:auto; }
+.card { background:white; padding:15px; margin-bottom:15px; border-radius:10px; }
+input, select { width:100%; padding:8px; margin-top:5px; }
+button { padding:10px; margin-top:10px; cursor:pointer; background:#1f6feb; color:white; border:0; border-radius:6px; }
+a.button { display:inline-block; padding:10px; background:#555; color:white; border-radius:6px; text-decoration:none; margin-top:10px; }
+</style>
+</head>
+
+<body>
+
+<h1>🏠 Immobilienbewertung</h1>
+
+<div class="card">
+<h3>Objektdaten</h3>
+
+<label>Adresse</label>
+<input id="adresse">
+
+<label>Baujahr</label>
+<input id="baujahr" type="number">
+
+<label>Fläche</label>
+<input id="flaeche" type="number">
+
+<a class="button" href="bad.html">➡ Bad Bewertung öffnen</a>
+</div>
+
+<div class="card" id="report">
+<h3>Zusammenfassung</h3>
+<p>Fülle die Bewertung auf den Unterseiten aus.</p>
+</div>
+
+<button onclick="exportPDF()">PDF Export</button>
+
+<script>
+function exportPDF() {
+    const element = document.getElementById("report");
+
+    html2pdf().set({
+        margin: 10,
+        filename: 'immobilienbewertung.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    }).from(element).save();
+}
+</script>
+
+</body>
+</html>
