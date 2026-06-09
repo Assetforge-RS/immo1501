@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bad Bewertung</title>
+
+<style>
+body { font-family: Arial; background:#f4f6f8; padding:20px; max-width:800px; margin:auto; }
+.card { background:white; padding:15px; border-radius:10px; }
+select, textarea { width:100%; padding:8px; margin-top:5px; }
+button { padding:10px; margin-top:10px; background:#1f6feb; color:white; border:0; border-radius:6px; }
+a { display:inline-block; margin-top:10px; }
+</style>
+</head>
+
+<body>
+
+<h1>🛁 Bad Bewertung</h1>
+
+<div class="card">
+
+<label>Zustand Bad (1 = gut, 5 = schlecht)</label>
+<select id="bad">
+    <option value="1">1 sehr gut</option>
+    <option value="2">2 gut</option>
+    <option value="3">3 mittel</option>
+    <option value="4">4 schlecht</option>
+    <option value="5">5 sehr schlecht</option>
+</select>
+
+<label>Bemerkung</label>
+<textarea id="text"></textarea>
+
+<button onclick="save()">Speichern</button>
+
+<br>
+
+<a href="index.html">⬅ Zurück</a>
+
+</div>
+
+<script>
+function save() {
+    const data = {
+        bad: document.getElementById("bad").value,
+        text: document.getElementById("text").value
+    };
+
+    localStorage.setItem("badBewertung", JSON.stringify(data));
+    alert("Gespeichert");
+}
+</script>
+
+</body>
+</html>
